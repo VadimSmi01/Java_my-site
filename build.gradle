@@ -3,18 +3,28 @@ plugins {
     id 'war'
 }
 
-group = 'com.example'
-version = '1.0.0'
-
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation 'org.postgresql:postgresql:42.7.3'
+    implementation 'org.postgresql:postgresql:42.7.2'
     providedCompile 'javax.servlet:javax.servlet-api:4.0.1'
 }
 
 war {
+    archiveFileName = 'ROOT.war'
     webAppDirName = 'src/main/webapp'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect {
+            zipTree(it)
+        }
+    }
+    into('WEB-INF/lib') {
+        from {
+            configurations.runtimeClasspath.filter { it.name.endsWith('jar') }
+        }
+    }
 }
