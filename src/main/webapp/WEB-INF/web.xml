@@ -38,5 +38,14 @@
         <servlet-name>DeleteUserServlet</servlet-name>
         <url-pattern>/delete-user</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>EditUserServlet</servlet-name>
+        <servlet-class>servlet.EditUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>EditUserServlet</servlet-name>
+        <url-pattern>/edit-user</url-pattern>
+    </servlet-mapping>
 
 </web-app>

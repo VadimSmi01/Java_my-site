@@ -14,7 +14,7 @@
         Class.forName("org.postgresql.Driver");
         Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/my_site", "vadimsmirnov", "");
 
-        // Получаем роль
+        // Получаем роль текущего пользователя
         PreparedStatement roleStmt = conn.prepareStatement("SELECT role FROM public.users WHERE username = ?");
         roleStmt.setString(1, username);
         ResultSet roleRs = roleStmt.executeQuery();
@@ -30,10 +30,9 @@
             return;
         }
 
-        // Получаем пользователей
+        // Получаем список всех пользователей
         Statement userStmt = conn.createStatement();
         ResultSet users = userStmt.executeQuery("SELECT id, username, role FROM public.users");
-
 %>
 
 <h2>Панель администратора</h2>
@@ -52,8 +51,6 @@
             int uid = users.getInt("id");
             String uname = users.getString("username");
             String urole = users.getString("role");
-
-            // не разрешаем удалять самого себя
             boolean isSelf = uname.equals(username);
 %>
     <tr>
@@ -61,6 +58,13 @@
         <td><%= uname %></td>
         <td><%= urole %></td>
         <td>
+            <!-- Кнопка редактирования -->
+            <form method="get" action="edit-user.jsp" style="display:inline;">
+                <input type="hidden" name="id" value="<%= uid %>">
+                <button type="submit">Редактировать</button>
+            </form>
+
+            <!-- Кнопка удаления -->
             <% if (!isSelf) { %>
                 <form method="post" action="delete-user" style="display:inline;" onsubmit="return confirm('Удалить пользователя <%= uname %>?');">
                     <input type="hidden" name="id" value="<%= uid %>">
