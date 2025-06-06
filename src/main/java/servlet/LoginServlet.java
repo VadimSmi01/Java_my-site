@@ -8,13 +8,13 @@ import java.sql.*;
 public class LoginServlet extends HttpServlet {
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/my_site";
     private static final String DB_USER = "vadimsmirnov";
-    private static final String DB_PASS = "";
+    private static final String DB_PASS = "123456";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // 👇 Фиксим кракозябры
+        // Устанавливаем кодировку запроса и ответа
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("text/html; charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
@@ -23,6 +23,7 @@ public class LoginServlet extends HttpServlet {
         String password = req.getParameter("password");
 
         try {
+            // Подключаем драйвер PostgreSQL
             Class.forName("org.postgresql.Driver");
 
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS)) {
@@ -33,10 +34,12 @@ public class LoginServlet extends HttpServlet {
                     ResultSet rs = stmt.executeQuery();
 
                     if (rs.next()) {
+                        // Успешный вход: сохраняем в сессию и редиректим
                         HttpSession session = req.getSession();
                         session.setAttribute("username", username);
-                        resp.getWriter().println("Добро пожаловать, " + username + "!");
+                        resp.sendRedirect("index.jsp");
                     } else {
+                        // Неверные данные
                         resp.getWriter().println("Неверное имя пользователя или пароль.");
                     }
                 }
