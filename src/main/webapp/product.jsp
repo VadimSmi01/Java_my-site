@@ -20,8 +20,17 @@
                 ResultSet rs = stmt.executeQuery();
 
                 if (rs.next()) {
+                    String imageUrl = rs.getString("image_url");
     %>
-        <div class="card shadow p-4">
+        <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+            <% if (imageUrl != null && !imageUrl.isEmpty()) { %>
+                <img src="<%= imageUrl %>" class="card-img-top mb-4" alt="Product Image" style="max-height: 400px; object-fit: contain;">
+            <% } else { %>
+                <div style="width:100%; height:300px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; color:#ccc; font-size: 1.2rem;" class="mb-4">
+                    Нет изображения
+                </div>
+            <% } %>
+
             <h2 class="card-title mb-4">🛒 <%= rs.getString("name") %></h2>
             <p class="card-text mb-2"><strong>Цена:</strong> <%= rs.getDouble("price") %> ₽</p>
             <p class="card-text mb-4"><strong>Описание:</strong> <%= rs.getString("description") %></p>

@@ -8,7 +8,7 @@ import java.sql.*;
 public class DeleteProductServlet extends HttpServlet {
     private static final String DB_URL = "jdbc:postgresql://localhost:5432/my_site";
     private static final String DB_USER = "vadimsmirnov";
-    private static final String DB_PASS = "";
+    private static final String DB_PASS = "123456";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)

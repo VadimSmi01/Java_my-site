@@ -15,9 +15,17 @@
             ResultSet rs = stmt.executeQuery("SELECT * FROM products");
 
             while (rs.next()) {
+                String imageUrl = rs.getString("image_url");
     %>
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
+                <% if (imageUrl != null && !imageUrl.isEmpty()) { %>
+                    <img src="<%= imageUrl %>" class="card-img-top" alt="Product Image" style="max-height: 250px; object-fit: contain;">
+                <% } else { %>
+                    <div style="width:100%; height:250px; background:#f8f9fa; display:flex; align-items:center; justify-content:center; color:#ccc;">
+                        No Image
+                    </div>
+                <% } %>
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title"><%= rs.getString("name") %></h5>
                     <p class="card-text mb-2">Цена: <strong><%= rs.getDouble("price") %> ₽</strong></p>

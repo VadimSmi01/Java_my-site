@@ -9,6 +9,7 @@
         String name = "";
         double price = 0.0;
         String description = "";
+        String imageUrl = "";
 
         if (productId != null) {
             try {
@@ -23,6 +24,7 @@
                     name = rs.getString("name");
                     price = rs.getDouble("price");
                     description = rs.getString("description");
+                    imageUrl = rs.getString("image_url");
                 } else {
     %>
         <div class="alert alert-danger">Товар с ID <%= productId %> не найден.</div>
@@ -61,6 +63,12 @@
             <textarea name="description" class="form-control" rows="4" required><%= description %></textarea>
         </div>
 
+        <div class="form-group">
+            <label>Ссылка на изображение (image_url)</label>
+            <input type="text" name="image_url" class="form-control" value="<%= (imageUrl != null ? imageUrl : "") %>" />
+            <small class="form-text text-muted">Укажите прямую ссылку на изображение (например: https://i.imgur.com/XXXXXX.jpg)</small>
+        </div>
+
         <button type="submit" class="btn btn-primary">💾 Сохранить</button>
         <a href="admin.jsp" class="btn btn-secondary">⬅️ Отмена</a>
     </form>
@@ -69,5 +77,4 @@
     <footer class="mt-5 text-center text-muted">
         &copy; Все права защищены.
     </footer>
-
 </div>

@@ -18,7 +18,7 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate(); // Завершаем сессию
         }
 
-        // Можно просто перенаправить
+        // Перенаправляем
         resp.sendRedirect("index.jsp");
 
         // Или вывести сообщение (если не редиректим)
