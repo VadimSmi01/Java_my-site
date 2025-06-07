@@ -1,80 +1,73 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.sql.*, javax.servlet.*, javax.servlet.http.*" %>
-<%
-    request.setCharacterEncoding("UTF-8");
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*" %>
 
-    String username = (session != null) ? (String) session.getAttribute("username") : null;
+<jsp:include page="includes/menu.jsp" />
 
-    if (username == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
-
-    String role = "USER";
-
-    try {
-        Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection(
-            "jdbc:postgresql://localhost:5432/my_site",
-            "vadimsmirnov", ""
-        );
-
-        PreparedStatement roleStmt = conn.prepareStatement("SELECT role FROM public.users WHERE username = ?");
-        roleStmt.setString(1, username);
-        ResultSet roleRs = roleStmt.executeQuery();
-        if (roleRs.next()) {
-            role = roleRs.getString("role");
-        }
-        roleRs.close();
-        roleStmt.close();
-
-        if (!"ADMIN".equals(role)) {
-            out.println("<p>Доступ запрещён. Только для администратора.</p>");
-            conn.close();
-            return;
-        }
-
-        String idParam = request.getParameter("id");
+<div class="container mt-5">
+    <%
+        String productId = request.getParameter("id");
         String name = "";
-        String desc = "";
         double price = 0.0;
+        String description = "";
 
-        if (idParam != null) {
-            PreparedStatement stmt = conn.prepareStatement("SELECT name, description, price FROM public.products WHERE id = ?");
-            stmt.setInt(1, Integer.parseInt(idParam));
-            ResultSet rs = stmt.executeQuery();
+        if (productId != null) {
+            try {
+                Class.forName("org.postgresql.Driver");
+                Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/my_site", "vadimsmirnov", "");
 
-            if (rs.next()) {
-                name = rs.getString("name");
-                desc = rs.getString("description");
-                price = rs.getDouble("price");
+                PreparedStatement stmt = conn.prepareStatement("SELECT * FROM products WHERE id = ?");
+                stmt.setInt(1, Integer.parseInt(productId));
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    name = rs.getString("name");
+                    price = rs.getDouble("price");
+                    description = rs.getString("description");
+                } else {
+    %>
+        <div class="alert alert-danger">Товар с ID <%= productId %> не найден.</div>
+    <%
+                }
+
+                rs.close();
+                stmt.close();
+                conn.close();
+
+            } catch (Exception e) {
+                out.println("<div class='alert alert-danger'>Ошибка при загрузке товара: " + e.getMessage() + "</div>");
             }
-
-            rs.close();
-            stmt.close();
         }
+    %>
 
-        conn.close();
-    } catch (Exception e) {
-        out.println("Ошибка: " + e.getMessage());
-    }
-%>
+    <h2 class="mb-4"><%= (productId == null ? "➕ Добавить новый товар" : "✏️ Редактировать товар") %></h2>
 
-<h2><%= (request.getParameter("id") == null ? "Добавить новый товар" : "Редактировать товар") %></h2>
+    <form method="post" action="<%= (productId == null ? "create-product" : "edit-product") %>">
+        <% if (productId != null) { %>
+            <input type="hidden" name="id" value="<%= productId %>" />
+        <% } %>
 
-<form method="post" action="<%= (request.getParameter("id") == null ? "create-product" : "edit-product") %>">
-    <% if (request.getParameter("id") != null) { %>
-        <input type="hidden" name="id" value="<%= request.getParameter("id") %>">
-    <% } %>
+        <div class="form-group">
+            <label>Название товара</label>
+            <input type="text" name="name" class="form-control" value="<%= name %>" required />
+        </div>
 
-    <label>Название:</label><br>
-    <input type="text" name="name" value="<%= name %>" required><br><br>
+        <div class="form-group">
+            <label>Цена (₽)</label>
+            <input type="number" step="0.01" name="price" class="form-control" value="<%= price %>" required />
+        </div>
 
-    <label>Описание:</label><br>
-    <textarea name="description" rows="4" cols="50"><%= desc %></textarea><br><br>
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" class="form-control" rows="4" required><%= description %></textarea>
+        </div>
 
-    <label>Цена:</label><br>
-    <input type="number" step="0.01" name="price" value="<%= price %>" required><br><br>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+        <a href="admin.jsp" class="btn btn-secondary">⬅️ Отмена</a>
+    </form>
 
-    <button type="submit">Сохранить</button>
-</form>
+    <!-- Футер -->
+    <footer class="mt-5 text-center text-muted">
+        &copy; Все права защищены.
+    </footer>
+
+</div>

@@ -1,52 +1,70 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.sql.*, javax.servlet.*, javax.servlet.http.*" %>
-<%
-    request.setCharacterEncoding("UTF-8");
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*" %>
 
-    String userId = request.getParameter("id");
-    String username = "";
-    String role = "";
+<jsp:include page="includes/menu.jsp" />
 
-    try {
-        Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection(
-            "jdbc:postgresql://localhost:5432/my_site",
-            "vadimsmirnov",
-            ""  // ← пароль добавь, если есть
-        );
+<div class="container mt-5">
+    <%
+        String userId = request.getParameter("id");
 
-        PreparedStatement stmt = conn.prepareStatement(
-            "SELECT username, role FROM public.users WHERE id = ?"
-        );
-        stmt.setInt(1, Integer.parseInt(userId));
-        ResultSet rs = stmt.executeQuery();
+        if (userId == null) {
+    %>
+        <div class="alert alert-warning">ID пользователя не указан.</div>
+    <%
+        } else {
+            try {
+                Class.forName("org.postgresql.Driver");
+                Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/my_site", "vadimsmirnov", "");
 
-        if (rs.next()) {
-            username = rs.getString("username");
-            role = rs.getString("role");
+                PreparedStatement stmt = conn.prepareStatement("SELECT * FROM users WHERE id = ?");
+                stmt.setInt(1, Integer.parseInt(userId));
+                ResultSet rs = stmt.executeQuery();
+
+                if (rs.next()) {
+    %>
+
+        <h2 class="mb-4">✏️ Редактировать пользователя</h2>
+
+        <form method="post" action="edit-user">
+            <input type="hidden" name="id" value="<%= rs.getInt("id") %>" />
+
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" name="username" class="form-control" value="<%= rs.getString("username") %>" required />
+            </div>
+
+            <div class="form-group">
+                <label>Роль</label>
+                <select name="role" class="form-control" required>
+                    <option value="USER" <%= "USER".equals(rs.getString("role")) ? "selected" : "" %>>USER</option>
+                    <option value="ADMIN" <%= "ADMIN".equals(rs.getString("role")) ? "selected" : "" %>>ADMIN</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+            <a href="admin.jsp" class="btn btn-secondary">⬅️ Отмена</a>
+        </form>
+
+    <%
+                } else {
+    %>
+        <div class="alert alert-danger">Пользователь с ID <%= userId %> не найден.</div>
+    <%
+                }
+
+                rs.close();
+                stmt.close();
+                conn.close();
+
+            } catch (Exception e) {
+                out.println("<div class='alert alert-danger'>Ошибка при загрузке пользователя: " + e.getMessage() + "</div>");
+            }
         }
+    %>
 
-        rs.close();
-        stmt.close();
-        conn.close();
-    } catch (Exception e) {
-        out.println("Ошибка: " + e.getMessage());
-    }
-%>
+    <!-- Футер -->
+    <footer class="mt-5 text-center text-muted">
+        &copy; Все права защищены.
+    </footer>
 
-<h2>Редактирование пользователя</h2>
-
-<form method="post" action="edit-user">
-    <input type="hidden" name="id" value="<%= userId %>">
-
-    <label>Имя пользователя:</label><br>
-    <input type="text" name="username" value="<%= username %>" required><br><br>
-
-    <label>Роль:</label><br>
-    <select name="role">
-        <option value="USER" <%= "USER".equals(role) ? "selected" : "" %>>USER</option>
-        <option value="ADMIN" <%= "ADMIN".equals(role) ? "selected" : "" %>>ADMIN</option>
-    </select><br><br>
-
-    <button type="submit">Сохранить изменения</button>
-</form>
+</div>

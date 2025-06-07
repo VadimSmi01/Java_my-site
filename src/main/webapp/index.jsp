@@ -1,24 +1,43 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="javax.servlet.http.*,javax.servlet.*" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+
+<jsp:include page="includes/menu.jsp" />
+
 <%
     String username = (session != null) ? (String) session.getAttribute("username") : null;
 %>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Главная</title>
-</head>
-<body>
 
-<h2>Главная страница</h2>
+<div class="container mt-5">
 
-<% if (username != null) { %>
-    <p>Вы вошли как <strong><%= username %></strong></p>
-    <a href="logout">Выйти</a>
-<% } else { %>
-    <p>Вы не вошли в систему.</p>
-    <a href="login.jsp">Войти</a> | <a href="register.jsp">Регистрация</a>
-<% } %>
+    <!-- Заголовок -->
+    <div class="text-center mb-5">
+        <h1 class="display-4">Добро пожаловать на сайт!</h1>
+    </div>
 
-</body>
-</html>
+    <!-- Сообщение о пользователе -->
+    <% if (username != null) { %>
+        <div class="alert alert-success text-center">
+            Вы вошли как <strong><%= username %></strong> 🎉
+        </div>
+    <% } else { %>
+        <div class="alert alert-info text-center">
+            Вы не авторизованы. Пожалуйста, <a href="login.jsp" class="alert-link">войдите</a> или <a href="register.jsp" class="alert-link">зарегистрируйтесь</a>.
+        </div>
+    <% } %>
+
+    <!-- Основные кнопки -->
+    <div class="d-flex justify-content-center mt-4 flex-wrap">
+        <a href="catalog.jsp" class="btn btn-primary btn-lg m-2">🛍️ Перейти в каталог товаров</a>
+        <% if (username != null) { %>
+            <a href="logout" class="btn btn-secondary btn-lg m-2">🚪 Выйти из системы</a>
+        <% } else { %>
+            <a href="login.jsp" class="btn btn-success btn-lg m-2">🔐 Войти</a>
+            <a href="register.jsp" class="btn btn-warning btn-lg m-2">📝 Регистрация</a>
+        <% } %>
+    </div>
+
+    <!-- Дополнительно -->
+    <footer class="mt-5 text-center text-muted">
+        &copy; Все права защищены.
+    </footer>
+
+</div>

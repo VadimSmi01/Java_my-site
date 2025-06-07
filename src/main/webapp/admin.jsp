@@ -1,137 +1,106 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.sql.*, javax.servlet.http.*, javax.servlet.*" %>
-<%
-    String username = (session != null) ? (String) session.getAttribute("username") : null;
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*" %>
 
-    if (username == null) {
-        response.sendRedirect("login.jsp");
-        return;
-    }
+<jsp:include page="includes/menu.jsp" />
 
-    String role = "USER";
+<div class="container mt-5">
 
-    try {
-        Class.forName("org.postgresql.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/my_site", "vadimsmirnov", "");
+    <!-- Заголовок -->
+    <h2 class="mb-4">⚙️ Панель администратора</h2>
 
-        // Проверяем роль
-        PreparedStatement roleStmt = conn.prepareStatement("SELECT role FROM public.users WHERE username = ?");
-        roleStmt.setString(1, username);
-        ResultSet roleRs = roleStmt.executeQuery();
-        if (roleRs.next()) {
-            role = roleRs.getString("role");
-        }
-        roleRs.close();
-        roleStmt.close();
+    <!-- Таблица пользователей -->
+    <h4 class="mb-3">👥 Пользователи</h4>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Имя пользователя</th>
+                <th>Роль</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        <%
+            try {
+                Class.forName("org.postgresql.Driver");
+                Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/my_site", "vadimsmirnov", "");
 
-        if (!"ADMIN".equals(role)) {
-            out.println("<p>Доступ запрещён. Только для администратора.</p>");
-            conn.close();
-            return;
-        }
+                Statement userStmt = conn.createStatement();
+                ResultSet userRs = userStmt.executeQuery("SELECT * FROM users");
 
-        // === Список пользователей ===
-        Statement userStmt = conn.createStatement();
-        ResultSet users = userStmt.executeQuery("SELECT id, username, role FROM public.users");
-%>
+                while (userRs.next()) {
+        %>
+            <tr>
+                <td><%= userRs.getInt("id") %></td>
+                <td><%= userRs.getString("username") %></td>
+                <td><%= userRs.getString("role") %></td>
+                <td>
+                    <a href="edit-user.jsp?id=<%= userRs.getInt("id") %>" class="btn btn-sm btn-warning">✏️ Редактировать</a>
+                    <form method="post" action="delete-user" style="display:inline;">
+                        <input type="hidden" name="id" value="<%= userRs.getInt("id") %>" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить пользователя?');">🗑️ Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        <%
+                }
 
-<h2>Панель администратора</h2>
-<p>Добро пожаловать, <strong><%= username %></strong> (роль: <%= role %>)</p>
+                userRs.close();
+                userStmt.close();
+        %>
+        </tbody>
+    </table>
 
-<h3>Пользователи</h3>
+    <!-- Таблица товаров -->
+    <h4 class="mt-5 mb-3">📦 Товары</h4>
+    <a href="product-form.jsp" class="btn btn-success mb-3">➕ Добавить товар</a>
 
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Имя пользователя</th>
-        <th>Роль</th>
-        <th>Действия</th>
-    </tr>
+    <table class="table table-striped table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Цена</th>
+                <th>Описание</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+        <%
+                Statement productStmt = conn.createStatement();
+                ResultSet productRs = productStmt.executeQuery("SELECT * FROM products");
 
-<%
-        while (users.next()) {
-            int uid = users.getInt("id");
-            String uname = users.getString("username");
-            String urole = users.getString("role");
-            boolean isSelf = uname.equals(username);
-%>
-    <tr>
-        <td><%= uid %></td>
-        <td><%= uname %></td>
-        <td><%= urole %></td>
-        <td>
-            <!-- Редактировать -->
-            <form method="get" action="edit-user.jsp" style="display:inline;">
-                <input type="hidden" name="id" value="<%= uid %>">
-                <button type="submit">Редактировать</button>
-            </form>
+                while (productRs.next()) {
+        %>
+            <tr>
+                <td><%= productRs.getInt("id") %></td>
+                <td><%= productRs.getString("name") %></td>
+                <td><%= productRs.getDouble("price") %> ₽</td>
+                <td><%= productRs.getString("description") %></td>
+                <td>
+                    <a href="product-form.jsp?id=<%= productRs.getInt("id") %>" class="btn btn-sm btn-warning">✏️ Редактировать</a>
+                    <form method="post" action="delete-product" style="display:inline;">
+                        <input type="hidden" name="id" value="<%= productRs.getInt("id") %>" />
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить товар?');">🗑️ Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        <%
+                }
 
-            <!-- Удалить -->
-            <% if (!isSelf) { %>
-                <form method="post" action="delete-user" style="display:inline;" onsubmit="return confirm('Удалить пользователя <%= uname %>?');">
-                    <input type="hidden" name="id" value="<%= uid %>">
-                    <button type="submit">Удалить</button>
-                </form>
-            <% } else { %>
-                <i>Нельзя удалить себя</i>
-            <% } %>
-        </td>
-    </tr>
-<%
-        }
-        users.close();
-        userStmt.close();
+                productRs.close();
+                productStmt.close();
+                conn.close();
+            } catch (Exception e) {
+                out.println("<div class='alert alert-danger'>Ошибка при загрузке данных: " + e.getMessage() + "</div>");
+            }
+        %>
+        </tbody>
+    </table>
 
-        // === Список товаров ===
-        Statement prodStmt = conn.createStatement();
-        ResultSet prods = prodStmt.executeQuery("SELECT id, name, price FROM public.products");
-%>
-</table>
+    <!-- Футер -->
+    <footer class="mt-5 text-center text-muted">
+        &copy; Все права защищены.
+    </footer>
 
-<h3>Управление товарами</h3>
-
-<p><a href="product-form.jsp">➕ Добавить новый товар</a></p>
-
-<table border="1" cellpadding="5">
-    <tr>
-        <th>ID</th>
-        <th>Название</th>
-        <th>Цена</th>
-        <th>Действия</th>
-    </tr>
-
-<%
-        while (prods.next()) {
-            int pid = prods.getInt("id");
-            String pname = prods.getString("name");
-            double pprice = prods.getDouble("price");
-%>
-    <tr>
-        <td><%= pid %></td>
-        <td><%= pname %></td>
-        <td><%= pprice %> ₽</td>
-        <td>
-            <!-- Редактировать -->
-            <form method="get" action="product-form.jsp" style="display:inline;">
-                <input type="hidden" name="id" value="<%= pid %>">
-                <button type="submit">Редактировать</button>
-            </form>
-
-            <!-- Удалить -->
-            <form method="post" action="delete-product" style="display:inline;" onsubmit="return confirm('Удалить товар <%= pname %>?');">
-                <input type="hidden" name="id" value="<%= pid %>">
-                <button type="submit">Удалить</button>
-            </form>
-        </td>
-    </tr>
-<%
-        }
-
-        prods.close();
-        prodStmt.close();
-        conn.close();
-    } catch (Exception e) {
-        out.println("Ошибка: " + e.getMessage());
-    }
-%>
-</table>
+</div>
