@@ -47,5 +47,34 @@
         <servlet-name>EditUserServlet</servlet-name>
         <url-pattern>/edit-user</url-pattern>
     </servlet-mapping>
+    <servlet>
+        <servlet-name>CreateProductServlet</servlet-name>
+        <servlet-class>servlet.CreateProductServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CreateProductServlet</servlet-name>
+        <url-pattern>/create-product</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>EditProductServlet</servlet-name>
+        <servlet-class>servlet.EditProductServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>EditProductServlet</servlet-name>
+        <url-pattern>/edit-product</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeleteProductServlet</servlet-name>
+        <servlet-class>servlet.DeleteProductServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeleteProductServlet</servlet-name>
+        <url-pattern>/delete-product</url-pattern>
+    </servlet-mapping>
 
 </web-app>
