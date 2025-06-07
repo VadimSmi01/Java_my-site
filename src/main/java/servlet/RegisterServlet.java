@@ -32,10 +32,10 @@ public class RegisterServlet extends HttpServlet {
                     stmt.setString(2, password);
                     stmt.executeUpdate();
 
-                    // Можно просто редиректить:
+                    // Редиректить:
                     // resp.sendRedirect("index.jsp");
 
-                    // Или отобразить сообщение:
+                    // Сообщение
                     resp.getWriter().println("Добро пожаловать, " + username + "! Регистрация успешна.");
                 }
             }

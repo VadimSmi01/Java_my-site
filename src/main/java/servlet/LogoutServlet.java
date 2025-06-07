@@ -21,7 +21,7 @@ public class LogoutServlet extends HttpServlet {
         // Перенаправляем
         resp.sendRedirect("index.jsp");
 
-        // Или вывести сообщение (если не редиректим)
+        // Редирект
         // resp.getWriter().println("Вы успешно вышли из системы.");
     }
 }

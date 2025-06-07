@@ -21,7 +21,7 @@ public class DeleteUserServlet extends HttpServlet {
 
         String idParam = req.getParameter("id");
 
-        // Проверка: админ ли пользователь (дополнительно можно внедрить)
+        // Проверка: админ ли пользователь
         HttpSession session = req.getSession(false);
         String currentUser = (session != null) ? (String) session.getAttribute("username") : null;
 
